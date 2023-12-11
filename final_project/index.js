@@ -19,12 +19,16 @@ app.use(
 
 app.use("/customer/auth/*", function auth(req, res, next) {
   //Write the authenication mechanism here
+  const token = req.headers.authorization || req.query.token;
+  console.log("Current state of books:", books);
+
+
   if (!token) {
     return res.status(401).json({ message: "Authorization token is missing." });
   }
 
   try {
-    const decoded = jwt.verify(token, "your_secret_key");
+    const decoded = jwt.verify(token, "88066899917c1fdc7d9fe0aacb691d5b3a065aba4e5fee31c2abd66e2f39285c");
     req.user = decoded; // Attach the decoded user to the request object
     next();
   } catch (error) {
