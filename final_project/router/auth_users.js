@@ -55,20 +55,69 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
   const { isbn } = req.params;
   const { review } = req.body;
 
+  const reviewer = req.user.username; // Extracted username from JWT token
+  console.log(reviewer);
+
   const book = Object.values(books).find((book) => book.isbn === isbn);
-  console.log("Book:", book);
 
   // Check if the book with the provided ISBN exists
   if (book) {
-    // Add the review to the found book's reviews
-    const reviewId = Object.keys(book.reviews).length + 1;
-    book.reviews[reviewId] = review;
+    // Check if 'reviews' property exists and is an object
+    if (!book.reviews || typeof book.reviews !== "object") {
+      book.reviews = {}; // Initialize 'reviews' as an object if it doesn't exist or is not an object
+    }
+
+    // Check if the user has already reviewed this book
+    if (book.reviews.hasOwnProperty(reviewer)) {
+      // Update the existing review if the user has already reviewed this book
+      book.reviews[reviewer] = review;
+    } else {
+      // Add a new review if the user has not reviewed this book before
+      book.reviews[reviewer] = review;
+    }
 
     // You might want to save the updated 'books' object to your database here if you're using one
 
-    return res.status(200).json({ message: "Review added successfully" });
+    return res
+      .status(200)
+      .json({ message: "Review added or updated successfully" });
   } else {
     return res.status(404).json({ message: "Book not found this time" });
+  }
+});
+
+// Delete a book review
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+  //Write your code here
+  const { isbn } = req.params;
+  const reviewer = req.user.username;
+
+  const book = Object.values(books).find((book) => book.isbn === isbn);
+
+  // Check if the book with the provided ISBN exists
+  if (book) {
+    // Check if 'reviews' property exists and is an object
+    if (book.reviews && typeof book.reviews === "object") {
+      // Check if the user has a review for this book
+      if (book.reviews.hasOwnProperty(reviewer)) {
+        // Delete the review
+        delete book.reviews[reviewer];
+
+        // You might want to save the updated 'books' object to your database here if you're using one
+
+        return res.status(200).json({ message: "Review deleted successfully" });
+      } else {
+        return res
+          .status(404)
+          .json({ message: "Review not found for the user" });
+      }
+    } else {
+      return res
+        .status(404)
+        .json({ message: "No reviews found for this book" });
+    }
+  } else {
+    return res.status(404).json({ message: "Book not found" });
   }
 });
 
