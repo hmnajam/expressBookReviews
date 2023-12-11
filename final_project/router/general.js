@@ -33,9 +33,23 @@ public_users.post("/register", (req, res) => {
 });
 
 // Get the book list available in the shop
-public_users.get("/", function (req, res) {
-  //Write your code here
-  res.json(books);
+public_users.get("/", async function (req, res) {
+  try {
+    const response = await axios.get("your_api_endpoint");
+    // Handle the response data
+    res.json(response.data);
+  } catch (error) {
+    // Log the detailed error for debugging
+    console.error("Error fetching book list:", error);
+
+    // Check if it's a connection error
+    if (error.code === 'ECONNREFUSED') {
+      res.status(500).send("Connection Refused: Unable to connect to the server.");
+    } else {
+      // Handle other types of errors
+      res.status(500).send("Internal Server Error");
+    }
+  }
 });
 
 // Get book details based on ISBN
