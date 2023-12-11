@@ -30,7 +30,10 @@ regd_users.post("/login", (req, res) => {
     // Check if the username exists and the password is correct
     if (isValid(username) && authenticatedUser(username, password)) {
       // Create a JWT token
-      const token = jwt.sign({ username }, "88066899917c1fdc7d9fe0aacb691d5b3a065aba4e5fee31c2abd66e2f39285c");
+      const token = jwt.sign(
+        { username },
+        "88066899917c1fdc7d9fe0aacb691d5b3a065aba4e5fee31c2abd66e2f39285c"
+      );
 
       // Return the token in the response
       return res.status(200).json({ token });
@@ -49,22 +52,23 @@ regd_users.post("/login", (req, res) => {
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
   //Write your code here
-
   const { isbn } = req.params;
   const { review } = req.body;
-  console.log("Received PUT request for /auth/review/:isbn", isbn);
+
+  const book = Object.values(books).find((book) => book.isbn === isbn);
+  console.log("Book:", book);
 
   // Check if the book with the provided ISBN exists
-  if (books[isbn]) {
-    // Add the review to the book's reviews
-    const reviewId = Object.keys(books[isbn].reviews).length + 1;
-    books[isbn].reviews[reviewId] = review;
+  if (book) {
+    // Add the review to the found book's reviews
+    const reviewId = Object.keys(book.reviews).length + 1;
+    book.reviews[reviewId] = review;
 
     // You might want to save the updated 'books' object to your database here if you're using one
 
     return res.status(200).json({ message: "Review added successfully" });
   } else {
-    return res.status(404).json({ message: "Book not found" });
+    return res.status(404).json({ message: "Book not found this time" });
   }
 });
 
